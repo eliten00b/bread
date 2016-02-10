@@ -1,0 +1,28 @@
+#!/bin/bash
+# bread-remote-version
+
+# $0 INSTALL_ROOT PACKAGE [version]
+#   default version: latest
+
+info() {
+  [ -z "${BREAD_VERBOSE}" ] && return
+  echo -e "\033[0;93m${1}\033[0m" 1>&2
+}
+
+INSTALL_ROOT="${1}"
+PACKAGE="${2}"
+VERSION="${3}"
+
+PACKAGE_LIST_URL="https://goo.gl/9e11SN"
+
+PACKAGE_LIST="$(curl -Ls "${PACKAGE_LIST_URL}")"
+info "${PACKAGE_LIST}"
+
+if [ -z "${VERSION}" ] || [ "${VERSION}" == "latest" ] ; then
+  PACKAGE_INFO="$(echo "${PACKAGE_LIST}" | grep -m1 "^${PACKAGE}|")"
+else
+  PACKAGE_INFO="$(echo "${PACKAGE_LIST}" | grep -m1 "^${PACKAGE}|${VERSION}|")"
+fi
+
+[ -z "${PACKAGE_INFO}" ] && exit 1
+echo "${PACKAGE_INFO}"

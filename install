@@ -1,0 +1,49 @@
+#!/bin/bash
+# install
+
+die() {
+  echo -e "\033[0;31m${1}\033[0m"
+  exit 1
+}
+
+if [[ "$1" = "-h" ]]; then
+  cat <<-EOS
+Usage: $0 [VERSION [--local]]
+
+  --local   Check for bread tar in releases/
+EOS
+  exit
+fi
+
+
+REPO="eliten00b/bread"
+if [ -z "${1}" ]; then
+  VERSION="$(curl -Ls "https://raw.githubusercontent.com/${REPO}/master/share/bread/version")"
+  echo "bread version ${VERSION} found"
+else
+  VERSION="${1}"
+fi
+INSTALL_ROOT="/usr/local"
+TMP_TAR="/usr/local/tmp/bread-${VERSION}.tar.gz"
+
+mkdir -p "/usr/local/tmp" || die "Fail to create tmp folder"
+
+if [ "${2}" = "--local" ]; then
+  cp "releases/bread-${VERSION}.tar.gz" "${TMP_TAR}" || die "no permissions to install"
+
+else
+  RELEASE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/bread-${VERSION}.tar.gz"
+  HTTP_CODE="$(curl -w "%{http_code}" -LIso /dev/null "${RELEASE_URL}")"
+  [[ "${HTTP_CODE}" -eq "200" ]] || die "download failed"
+  curl -Lo "${TMP_TAR}" "${RELEASE_URL}"
+fi
+
+tar xzf "${TMP_TAR}" -C "${INSTALL_ROOT}" || die "can not extract files"
+tar tf "${TMP_TAR}" > "${INSTALL_ROOT}/share/bread/installed_files"
+rm "${TMP_TAR}"
+touch "${INSTALL_ROOT}/share/bread/package_list"
+
+cat << EOS
+bread ${VERSION} installed.
+  usage: bread help
+EOS

@@ -1,0 +1,64 @@
+#!/bin/bash
+# bread-install
+
+die() {
+  echo -e "\033[0;31m${1}\033[0m"
+  exit 1
+}
+
+info() {
+  [ -z "${BREAD_VERBOSE}" ] && return
+  echo -e "\033[0;93m${1}\033[0m" 1>&2
+}
+
+[ -z "${1}" ] && die "${0} INSTALL_ROOT PACKAGE"
+
+INSTALL_ROOT="${1}"
+shift
+
+PACKAGE_SOURCE="https://googledrive.com/host/0B8M9Vz-f235KQzJDWGF4eEpJSlU"
+PACKAGE_CACHE="${INSTALL_ROOT}/share/bread/packages"
+mkdir -p "${PACKAGE_CACHE}" || die "Failed to create package cache"
+ 
+while [ ! -z "${1}" ]; do
+  PACKAGE="$(echo "${1}" | awk -F\: '{print $1}')"
+  PACKAGE_VERSION="$(echo "${1}" | awk -F\: '{print $2}')"
+  shift
+
+
+  info "Checking install ${PACKAGE} ${PACKAGE_VERSION}"
+
+  LOCAL_STATUS="$(${INSTALL_ROOT}/libexec/bread/bread-local-status ${INSTALL_ROOT} ${PACKAGE} ${PACKAGE_VERSION})"
+  [ ${LOCAL_STATUS} -eq 2 ] && die "ERROR: Different version of package installed: ${PACKAGE}"
+  if [ ${LOCAL_STATUS} -eq 1 ]; then
+    echo "Package already installed: ${PACKAGE}"
+    info "Skip install package: ${PACKAGE}"
+    continue
+  fi
+
+  PACKAGE_INFO="$(${INSTALL_ROOT}/libexec/bread/bread-remote-version ${INSTALL_ROOT} ${PACKAGE} ${PACKAGE_VERSION})"
+  info "Remote package info: ${PACKAGE_INFO}"
+  [ -z "${PACKAGE_INFO}" ] && die "Package: ${PACKAGE} not found"
+
+  PACKAGE_VERSION="$(echo "${PACKAGE_INFO}" | cut -d\| -f2)"
+  
+  PACKAGE_NAME="$(uname -m)-${PACKAGE}-${PACKAGE_VERSION}.tar.gz"
+  echo "Package to install: ${PACKAGE_NAME}"
+
+  PACKAGE_DEPENDENCIES="$(echo "${PACKAGE_INFO}" | cut -d\| -f3)"
+  if [ ! -z "${PACKAGE_DEPENDENCIES}" ]; then
+    echo "Dependencies: ${PACKAGE_DEPENDENCIES//,/ }"
+    $0 ${INSTALL_ROOT} ${PACKAGE_DEPENDENCIES//,/ } || die "Fail to install dependencies"
+  fi
+
+  PACKAGE_URL="${PACKAGE_SOURCE}/${PACKAGE}/${PACKAGE_NAME}"
+  PACKAGE_TAR="${PACKAGE_CACHE}/${PACKAGE_NAME}"
+
+  HTTP_CODE="$(curl -w "%{http_code}" -LIso /dev/null "${PACKAGE_URL}")"
+  [ "${HTTP_CODE}" -ne "200" ] && die "Tar file not found for ${PACKEAGE} ${PACKAGE_VERSION}"
+  curl -Lo "${PACKAGE_TAR}" "${PACKAGE_URL}" || die "Fail to download ${PACKAGE_NAME}"
+
+  tar xzf "${PACKAGE_CACHE}/${PACKAGE_NAME}" -C ${INSTALL_ROOT}/ || die "Fail to install ${PACKAGE}"
+  echo "${PACKAGE_INFO}" >> ${INSTALL_ROOT}/share/bread/package_list
+  echo "${PACKAGE} version ${PACKAGE_VERSION} installed"
+done

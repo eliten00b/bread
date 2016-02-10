@@ -1,0 +1,30 @@
+Bread - package manager for arm based chromebooks
+
+Usage:
+  bread COMMAND [ARGS]...
+
+  bread -V COMMAND [ARGS]...
+      with more verbose output
+
+
+Commands:
+  list
+      show installed packages
+
+  install PACKAGE[:VERSION] ...
+      download and install package and dependencies
+
+  uninstall PACKAGE
+      uninstall a package
+
+  search [TERM]
+      show all available packages or filter by TERM
+
+  selfupgrade
+      install newest version of bread
+
+  version
+      print version
+
+  help
+      show this help

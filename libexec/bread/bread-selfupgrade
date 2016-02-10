@@ -1,0 +1,7 @@
+#!/bin/bash
+# bread-selfupgrade
+
+# check local version vs remote version
+# download new version
+# uninstall
+# install new

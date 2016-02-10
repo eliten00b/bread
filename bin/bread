@@ -1,0 +1,27 @@
+#!/bin/bash
+# bread
+
+INSTALL_ROOT="${0%/*}"
+INSTALL_ROOT="${INSTALL_ROOT%/*}"
+
+if [ "${1}" = "-V" ]; then
+  export BREAD_VERBOSE=1
+  shift
+fi
+
+COMMAND="${1}"
+shift
+
+case "${COMMAND}" in
+list|install|uninstall|search)
+  ${INSTALL_ROOT}/libexec/bread/bread-${COMMAND} ${INSTALL_ROOT} "${@}"
+  ;;
+help|version)
+  cat "${INSTALL_ROOT}/share/bread/${COMMAND}"
+  ;;
+*)
+  echo "COMMAND: ${COMMAND} not available"
+  cat "${INSTALL_ROOT}/share/bread/help"
+  exit 1
+  ;;
+esac

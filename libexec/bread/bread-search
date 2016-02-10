@@ -1,0 +1,12 @@
+#!/bin/bash
+# bread-search
+
+PACKAGE_LIST_URL="https://goo.gl/9e11SN"
+PACKAGE_LIST="$(curl -Ls "${PACKAGE_LIST_URL}")"
+
+if [ -z "${2}" ]; then
+  echo "Show all packages:"
+  echo "${PACKAGE_LIST}" | cut -d\| -f1 | sort | xargs printf "%13s%13s%13s%13s%13s%13s\n"
+else
+  echo "${PACKAGE_LIST}" | cut -d\| -f1 | grep -E "${2}" | sort | xargs printf "%13s%13s%13s%13s%13s%13s\n"
+fi

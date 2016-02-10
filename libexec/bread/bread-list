@@ -1,0 +1,12 @@
+#!/bin/bash
+# bread-list
+
+if [ -z "${1}" ]; then
+  echo "${0} INSTALL_ROOT"
+  exit 1
+fi
+
+INSTALL_ROOT="${1}"
+
+echo "Packages installed:"
+cat "${INSTALL_ROOT}/share/bread/package_list" | awk -F\| '{print $1}' | sort | xargs printf "%13s%13s%13s%13s%13s%13s\n"

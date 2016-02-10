@@ -1,0 +1,25 @@
+#!/bin/bash
+# create-release
+
+if [ "${1}" == "-h" ]; then
+  echo "${0} [NEW_VERSION]"
+  echo "or"
+  echo "cat ${0} | sh -s [NEW_VERSION]"
+  echo "or"
+  echo "bash ${0} [NEW_VERSION]"
+  exit 1
+fi
+
+die() {
+  echo -e "\033[0;31m${1}\033[0m"
+  exit 1
+}
+
+if [ -z "${1}" ]; then
+  VERSION="$(cat share/bread/version)"
+else
+  VERSION="${1}"
+fi
+
+tar czf "releases/bread-${VERSION}.tar.gz" bin libexec share --owner=0 --group=0 || die "create failed"
+echo "created release in releases/bread-${VERSION}.tar.gz"

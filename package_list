@@ -1,0 +1,4 @@
+git|2.6.2|curl:7.45.0,openssl:1.0.2d
+curl|7.45.0|openssl:1.0.2d
+openssl|1.0.2d|
+nmap|6.47|openssl:1.0.2d

@@ -1,0 +1,48 @@
+#!/bin/bash
+# bread-uninstall
+
+die() {
+  echo -e "\033[0;31m${1}\033[0m"
+  exit 1
+}
+
+error() {
+  echo -e "\033[0;31m${1}\033[0m"
+}
+
+info() {
+  [ -z "${BREAD_VERBOSE}" ] && return
+  echo -e "\033[0;93m${1}\033[0m" 1>&2
+}
+
+( [ -z "${1}" ] || [ -z "${2}" ] ) && die "$0 INSTALL_ROOT PACKAGE"
+
+INSTALL_ROOT="${1}"
+PACKAGE="${2}"
+
+PACKAGE_CACHE="${INSTALL_ROOT}/share/bread/packages"
+PACKAGE_VERSION="$(cat "${INSTALL_ROOT}/share/bread/package_list" | grep -m1 "^${PACKAGE}|" | cut -d\| -f2)"
+
+[ -z "${PACKAGE_VERSION}" ] && die "package not installed"
+
+PACKAGE_TAR="${PACKAGE_CACHE}/$(uname -m)-${PACKAGE}-${PACKAGE_VERSION}.tar.gz"
+
+if [ ! -f "${PACKAGE_TAR}" ]; then
+  die "Tar file for package not found local"
+fi 
+
+while read FILE; do
+  if echo "${FILE}" | grep -qE "\/$" ; then
+    info "remove folder ${INSTALL_ROOT}/${FILE}"
+    rmdir --ignore-fail-on-non-empty "${INSTALL_ROOT}/${FILE}" || error "Fail to remove ${FILE}"
+  else
+    info "remove file ${INSTALL_ROOT}/${FILE}"
+    rm "${INSTALL_ROOT}/${FILE}" || error "Fail to remove ${FILE}"
+  fi
+done < <(tar tf "${PACKAGE_TAR}" | tac)
+
+info "remove ${PACKAGE} from installed packages"
+sed -i "/^${PACKAGE}|/d" ${INSTALL_ROOT}/share/bread/package_list || die "fail to uninstall ${PACKAGE}"
+info "remove old tar file"
+rm "${PACKAGE_TAR}" || die "Fail to remove old tar"
+echo "${PACKAGE} removed"

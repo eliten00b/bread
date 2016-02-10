@@ -1,0 +1,26 @@
+#!/bin/bash
+# bread-local-status
+
+# $0 INSTALL_ROOT PACKAGE [version]
+#   default version: latest
+# 0  Not installed
+# 1  Installed
+# 2  Different version
+
+INSTALL_ROOT="${1}"
+PACKAGE="${2}"
+
+PACKAGE_LIST="${INSTALL_ROOT}/share/bread/package_list"
+
+PACKAGE_VERSION="$(cat "${PACKAGE_LIST}" | grep -m1 "^${2}|" | cut -d\| -f2)"
+if [ -z "${PACKAGE_VERSION}" ]; then
+  echo "0"
+  exit
+fi
+
+if [ -z "${3}" ] || [ "${PACKAGE_VERSION}" == "${3}" ]; then
+  echo "1"
+  exit
+fi
+
+echo "2"
