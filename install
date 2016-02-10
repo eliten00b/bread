@@ -33,9 +33,9 @@ if [ "${2}" = "--local" ]; then
 
 else
   RELEASE_URL="https://github.com/${REPO}/releases/download/v${VERSION}/bread-${VERSION}.tar.gz"
-  HTTP_CODE="$(curl -w "%{http_code}" -LIso /dev/null "${RELEASE_URL}")"
+  HTTP_CODE="$(curl -w "%{http_code}" -Lso /dev/null "${RELEASE_URL}")"
   [[ "${HTTP_CODE}" -eq "200" ]] || die "download failed"
-  curl -Lo "${TMP_TAR}" "${RELEASE_URL}"
+  curl -Lo "${TMP_TAR}" "${RELEASE_URL}" || die "no permissions to install"
 fi
 
 tar xzf "${TMP_TAR}" -C "${INSTALL_ROOT}" || die "can not extract files"
