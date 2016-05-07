@@ -14,6 +14,7 @@ shift
 
 case "${COMMAND}" in
 list|install|uninstall|search)
+  export PACKAGE_LIST_URL="https://goo.gl/9e11SN"
   ${INSTALL_ROOT}/libexec/bread/bread-${COMMAND} ${INSTALL_ROOT} "${@}"
   ;;
 help|version)

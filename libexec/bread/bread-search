@@ -1,7 +1,6 @@
 #!/bin/bash
 # bread-search
 
-PACKAGE_LIST_URL="https://goo.gl/9e11SN"
 PACKAGE_LIST="$(curl -Ls "${PACKAGE_LIST_URL}")"
 
 if [ -z "${2}" ]; then
