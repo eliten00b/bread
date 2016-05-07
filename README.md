@@ -7,7 +7,7 @@ Supported chromebooks:
 
 ## Install
 
-`curl -L https://raw.githubusercontent.com/eliten00b/bread/master/install | sudo sh`
+`curl -L https://raw.githubusercontent.com/eliten00b/bread/master/install | sudo bash`
 
 `cat install | sudo sh # from local`
 
